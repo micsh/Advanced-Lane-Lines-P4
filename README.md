@@ -116,6 +116,10 @@ Here are the pipeline results on the test images:
 ### Video pipeline results
 Here's the *[project_video_output](project_video_output.mp4)* result of the project-video.
 
+Also here:
+
+[![video](https://img.youtube.com/vi/7dSWT4EIF0E/0.jpg)](https://youtu.be/7dSWT4EIF0E)
+
 ### Discussion 
 This project is a good proof of concept for finding lanes, but it is limited in real world scenarios. Some of the mechanics in the pipeline (like the calibration) are very useful and pretty stable. However, there were many assumptions made in other parts of the pipeline, for example, the pipeine can be easily fooled by lighting, road conditions, and many more elements in any or all parts of the pipeline. The sliding windows algorithm and the polyfit need to be restricted (as to not provide unacceptable results) for the algorithm to work. 
 But this is great foundation to start with and build (and improve) upon!
