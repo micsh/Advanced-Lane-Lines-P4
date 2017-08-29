@@ -42,8 +42,14 @@ And an example of test image and the resulting un-distortion:
 Next we will apply perspective transform, so we can focus on the relevant part of the image, this can be done with cv2:
 
 ```python
-src =  np.float32([[250,700],[1200,700],[550,450],[750,450]])
-dst = np.float32([[250,700],[1200,700],[300,50],[1000,50]])
+corners = np.float32([[190,720],[589,457],[698,457],[1145,720]])
+new_top_left=np.array([corners[0,0],0])
+new_top_right=np.array([corners[3,0],0])
+offset=[150,0]
+
+img_size = (img.shape[1], img.shape[0])
+src = np.float32([corners[0],corners[1],corners[2],corners[3]])
+dst = np.float32([corners[0]+offset,new_top_left+offset,new_top_right-offset ,corners[3]-offset])
 
 transform = cv2.getPerspectiveTransform(src, dst)
 cv2.warpPerspective(image, transform, (w, h))
@@ -92,7 +98,7 @@ Using the above combined filter that we will treat as a binary image, we will us
 Here's a visualization of how the algorithm works:
 ![sliding_vis](output_images/sliding_vis.png)
 
-There's an alternative implementation that uses the previous fit (i.e. previously found lanes) as a starting point for where to look for the current fit (useful in a continuous real-world scenarios).
+There's an alternative implementation that uses the previous fit (i.e. previously found lanes) as a starting point for where to look for the current fit (useful in a continuous real-world scenarios). This implementation also adds a single pixel line to the current binary image where the previous fit was - this adds a little error, but assuming the change between frames is minimal, this shouldn't be a major issue, and will be extra helpful where the lanes are not clearly visible, or occluded.
 
 ### Finding lane curvature and distance from lane center
 Converting screen pixels to real-world size, we can calculate the lane curvature and the cameras distance from lane center.
@@ -113,3 +119,8 @@ Here's the *[project_video_output](project_video_output.mp4)* result of the proj
 ### Discussion 
 This project is a good proof of concept for finding lanes, but it is limited in real world scenarios. Some of the mechanics in the pipeline (like the calibration) are very useful and pretty stable. However, there were many assumptions made in other parts of the pipeline, for example, the pipeine can be easily fooled by lighting, road conditions, and many more elements in any or all parts of the pipeline. The sliding windows algorithm and the polyfit need to be restricted (as to not provide unacceptable results) for the algorithm to work. 
 But this is great foundation to start with and build (and improve) upon!
+
+Issues that we need to worry about (other than light), i.e. work on improving:
+* Finding lanes using previous fit in a continuous manner helps a lot, and deals with a lot of issues, like occlusion, missing lines, and other artifacts that translate to edges on our detectors. But it can only fill gaps for a very short time, so what happens if there's a car in front of us ?
+* The implementation has no 'all good' or 'can't find lanes' states - which should be a must for a real-world working algorithm.
+* Basically, we need to step into the realm of partial knowledge, and have some level of construct of our current state to create a better fit for the edge cases. (And possibly also infra-red for night time).
